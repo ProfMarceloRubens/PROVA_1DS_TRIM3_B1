@@ -18,25 +18,25 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 // ==========================================
-// 2. LISTA OFICIAL DE ESTUDANTES (1DS CESF)
+// 2. LISTA OFICIAL DE ESTUDANTES (1DS CESF - 39 ALUNOS)
 // ==========================================
 const studentList = [
-  "2) ALLAN VINICIUS", "3) ANDREY EDIVAN", "4) BERNARDO AGE", "5) BERNARDO LEITE",
-  "6) CAIO MONTAGNA", "7) CHRISTIAN GABRIEL", "8) DANIEL MOREIRA", "9) DANIEL WILCEK",
-  "10) EDUARDO ANTONIO", "11) EDUARDO CREMER", "12) ELIAS SOUZA", "13) ELOÁ PEREIRA",
-  "14) ERICK HOE", "15) FERNANDO VALENTIM", "16) GABRIEL DA SILVA", "17) GABRIEL SOEK",
-  "18) GUSTAVO GONÇALVES", "19) GUSTAVO MASSOQUETO", "20) GUSTAVO SALDANHA", "21) IAN GUSTAVO",
-  "22) JHONATHAN DA SILVA", "23) JOÃO FRANCISCO", "24) JOÃO PEDRO", "25) JOSÉ ROBERTO",
-  "26) KAUE ALEXANDRE", "27) LEONARDO FRANQUITO", "30) LUÍS HENRIQUE", "33) MIGUEL PIETRO",
-  "34) OSVALDO ZANLORENZI", "35) PEDRO ZAGESKI", "36) RILLARY VITÓRIA", "37) RODRIGO ARAÚJO",
-  "38) ROGER DE PAULA", "39) THALES JOSÉ", "40) VICTOR HUGO", "41) WESLEY HENRIQUE",
-  "42) OTÁVIO DA SILVA", "43) VINÍCIUS APARECIDO", "44) DERIK LUCCA"
+  "ALLAN VINICIUS", "ANDREY EDIVAN", "BERNARDO AGE", "BERNARDO LEITE",
+  "CAIO MONTAGNA", "CHRISTIAN GABRIEL", "DANIEL MOREIRA", "DANIEL WILCEK",
+  "EDUARDO ANTONIO", "EDUARDO CREMER", "ELIAS SOUZA", "ELOÁ PEREIRA",
+  "ERICK HOE", "FERNANDO VALENTIM", "GABRIEL DA SILVA", "GABRIEL SOEK",
+  "GUSTAVO GONÇALVES", "GUSTAVO MASSOQUETO", "GUSTAVO SALDANHA", "IAN GUSTAVO",
+  "JHONATHAN DA SILVA", "JOÃO FRANCISCO", "JOÃO PEDRO", "JOSÉ ROBERTO",
+  "KAUE ALEXANDRE", "LEONARDO FRANQUITO", "LUÍS HENRIQUE", "MIGUEL PIETRO",
+  "OSVALDO ZANLORENZI", "PEDRO ZAGESKI", "RILLARY VITÓRIA", "RODRIGO ARAÚJO",
+  "ROGER DE PAULA", "THALES JOSÉ", "VICTOR HUGO", "WESLEY HENRIQUE",
+  "OTÁVIO DA SILVA", "VINÍCIUS APARECIDO", "DERIK LUCCA"
 ];
 
 // ==========================================
-// 3. BANCO DE 30 QUESTÕES (AULAS 09, 10 E 11)
+// 3A. BANCO DE 30 QUESTÕES ORIGINAL (PROVA 1 & RECUPERAÇÃO)
 // ==========================================
-const questionBank = [
+const questionBankP1 = [
   { id: 1, text: "Qual será a saída do comando 1 == '1' no console do JavaScript?", options: ["true", "false", "undefined", "TypeError"], answer: "true" },
   { id: 2, text: "Qual operador é utilizado para verificar a desigualdade entre dois valores no JS?", options: ["!=", "==", "=>", "="], answer: "!=" },
   { id: 3, text: "Qual o retorno da expressão (5 != 5) no console?", options: ["false", "true", "null", "NaN"], answer: "false" },
@@ -69,17 +69,103 @@ const questionBank = [
   { id: 30, text: "Se um teste interno em um aninhamento falhar, o programa executará o bloco:", options: ["'else' associado àquele 'if' interno específico", "Todo o arquivo HTML novamente", "O primeiro 'if' do script", "Nenhum código futuro"], answer: "'else' associado àquele 'if' interno específico" }
 ];
 
+// ==========================================
+// 3B. NOVO BANCO DE 30 QUESTÕES (PROVA 2 - AULAS 09, 10, 11 E JS GERAL)
+// ==========================================
+const questionBankP2 = [
+  { id: 101, text: "No JavaScript, por que a expressão 5 == '5' retorna true?", options: ["Porque o JS converte automaticamente a string para número antes de comparar", "Porque '5' e 5 ocupam o mesmo espaço na memória física", "Porque o operador == ignora qualquer tipo de erro de sintaxe", "Porque números e textos são idênticos em todas as linguagens"], answer: "Porque o JS converte automaticamente a string para número antes de comparar" },
+  { id: 102, text: "Quais são os dois únicos valores possíveis retornados por uma operação de comparação em JavaScript?", options: ["true ou false", "0 ou 1", "sim ou não", "null ou undefined"], answer: "true ou false" },
+  { id: 103, text: "Qual será a saída no Console do Chrome ao digitar: 1 != 2", options: ["true", "false", "1", "SyntaxError"], answer: "true" },
+  { id: 104, text: "Ao testar comparações entre letras no Console do navegador, qual será o resultado de 'a' > 'z'?", options: ["false", "true", "NaN", "undefined"], answer: "false" },
+  { id: 105, text: "Em um formulário HTML, qual atributo de um campo <input> oculta os caracteres digitados (como em uma tela de senha)?", options: ["type=\"password\"", "type=\"hidden\"", "type=\"secret\"", "type=\"text\""], answer: "type=\"password\"" },
+  { id: 106, text: "Qual evento HTML é utilizado em uma tag <button> para disparar uma função JavaScript ao ser clicado?", options: ["onclick", "onchange", "onhover", "onsubmit"], answer: "onclick" },
+  { id: 107, code: "var idade = parseInt(document.getElementById('idade').value);\nvar faltam = 65 - idade;", text: "No desafio da aposentadoria (Aula 10), se o usuário digitar 50, qual será o valor armazenado na variável 'faltam'?", options: ["15", "65", "50", "-15"], answer: "15" },
+  { id: 108, code: "var idade = 68;\nif (idade >= 65) {\n  alert('Pode aposentar');\n} else {\n  alert('Ainda precisa trabalhar');\n}", text: "Com base no código acima, qual mensagem será exibida para idade = 68?", options: ["Pode aposentar", "Ainda precisa trabalhar", "Nenhuma mensagem", "Erro de execução"], answer: "Pode aposentar" },
+  { id: 109, text: "Por que precisamos usar parseInt() ao capturar um número digitado em um <input> HTML antes de fazer cálculos?", options: ["Porque valores vindos de inputs HTML chegam originalmente como texto (string)", "Porque o comando alert() só aceita números inteiros", "Para arredondar o texto para letras maiúsculas", "Porque o JavaScript não aceita variáveis sem parseInt()"], answer: "Porque valores vindos de inputs HTML chegam originalmente como texto (string)" },
+  { id: 110, code: "var tentativa = '1234';\nvar senha = '2112';\nif (tentativa == senha) {\n  alert('Acesso permitido');\n} else {\n  alert('Senha incorreta');\n}", text: "Ao executar este script de login, qual alerta aparecerá na tela?", options: ["Senha incorreta", "Acesso permitido", "2112", "Nenhum alerta"], answer: "Senha incorreta" },
+  { id: 111, text: "Na estrutura de decisão das eleições (Aula 11), para uma pessoa de 16 anos, qual é a situação do voto?", options: ["Voto facultativo", "Não pode votar", "Voto obrigatório", "Apenas voto em trânsito"], answer: "Voto facultativo" },
+  { id: 112, code: "var idade = 66;\nif (idade < 16) {\n  alert('Não vota');\n} else {\n  if (idade < 18) {\n    alert('Facultativo');\n  } else {\n    if (idade > 65) {\n      alert('Facultativo');\n    } else {\n      alert('Obrigatório');\n    }\n  }\n}", text: "Seguindo a lógica encadeada da Aula 11, qual alerta será exibido para idade = 66?", options: ["Facultativo", "Obrigatório", "Não vota", "Erro de aninhamento"], answer: "Facultativo" },
+  { id: 113, code: "var idade = 35;\nif (idade < 16) {\n  alert('Não vota');\n} else {\n  if (idade < 18) {\n    alert('Facultativo');\n  } else {\n    if (idade > 65) {\n      alert('Facultativo');\n    } else {\n      alert('Obrigatório');\n    }\n  }\n}", text: "Para um cidadão com idade = 35, qual mensagem o sistema exibirá?", options: ["Obrigatório", "Facultativo", "Não vota", "Nenhuma"], answer: "Obrigatório" },
+  { id: 114, text: "No desafio 'positividade.html' (Aula 11), quais são as três classificações possíveis para um número digitado?", options: ["Positivo, negativo ou nulo", "Par, ímpar ou primo", "Inteiro, real ou texto", "Maior, menor ou diferente"], answer: "Positivo, negativo ou nulo" },
+  { id: 115, code: "var num = -8;\nif (num > 0) {\n  alert('Positivo');\n} else {\n  if (num < 0) {\n    alert('Negativo');\n  } else {\n    alert('Nulo');\n  }\n}", text: "Qual saída será produzida pelo código acima?", options: ["Negativo", "Positivo", "Nulo", "undefined"], answer: "Negativo" },
+  { id: 116, text: "No desafio 'comparacao.html' (Aula 11), o programa solicita dois números e verifica se o primeiro é:", options: ["Maior, menor ou igual ao segundo", "Somado ou subtraído do segundo", "Divisível pelo segundo", "Diferente de zero"], answer: "Maior, menor ou igual ao segundo" },
+  { id: 117, code: "var a = 15;\nvar b = 20;\nif (a > b) {\n  console.log('Primeiro maior');\n} else {\n  if (a < b) {\n    console.log('Primeiro menor');\n  } else {\n    console.log('Iguais');\n  }\n}", text: "O que será impresso no console?", options: ["Primeiro menor", "Primeiro maior", "Iguais", "false"], answer: "Primeiro menor" },
+  { id: 118, text: "Em HTML, dentro de qual tag costumamos inserir o código JavaScript diretamente na página?", options: ["<script>", "<style>", "<link>", "<meta>"], answer: "<script>" },
+  { id: 119, text: "Qual operador realiza a concatenação (junção) de um texto com o valor de uma variável dentro de um alert() em JS?", options: ["Sinal de mais ( + )", "Asterisco ( * )", "Ponto e vírgula ( ; )", "Dois pontos ( : )"], answer: "Sinal de mais ( + )" },
+  { id: 120, code: "var nome = 'Carlos';\nalert('Olá ' + nome + '!');", text: "Qual mensagem será exibida na caixa de alerta?", options: ["Olá Carlos!", "Olá nome!", "Carlos", "Olá + nome + !"], answer: "Olá Carlos!" },
+  { id: 121, text: "Para que serve o ponto e vírgula ( ; ) ao final das instruções em JavaScript?", options: ["Indicar o encerramento de uma instrução/comando", "Criar um comentário no código", "Multiplicar dois valores", "Abrir um bloco condicional"], answer: "Indicar o encerramento de uma instrução/comando" },
+  { id: 122, text: "Qual método exibe uma caixa de diálogo pop-up com uma mensagem e um botão 'OK' no navegador?", options: ["alert()", "console.log()", "parseInt()", "getElementById()"], answer: "alert()" },
+  { id: 123, text: "Qual comando é usado para escrever mensagens de depuração diretamente na aba Console do DevTools?", options: ["console.log()", "alert()", "document.write()", "prompt()"], answer: "console.log()" },
+  { id: 124, code: "var x = 10;\nx = 25;\nconsole.log(x);", text: "Qual valor será exibido no console ao executar este código?", options: ["25", "10", "35", "Erro de redeclaração"], answer: "25" },
+  { id: 125, text: "Qual será o resultado da comparação: 10 <= 10", options: ["true", "false", "10", "NaN"], answer: "true" },
+  { id: 126, text: "Qual será o resultado da comparação: 7 < 3", options: ["false", "true", "7", "3"], answer: "false" },
+  { id: 127, text: "Em um código JavaScript, o que delimita o início e o fim do bloco de instruções de uma function?", options: ["Chaves { }", "Colchetes [ ]", "Aspas \" \"", "Sinais de menor e maior < >"], answer: "Chaves { }" },
+  { id: 128, text: "Por que devemos alinhar verticalmente cada par de 'if' e 'else' ao programar?", options: ["Para facilitar a leitura e evitar erros de lógica no aninhamento", "Porque o navegador não executa códigos desalinhados", "Para diminuir o tamanho do arquivo em bytes", "Para transformar o código em HTML automaticamente"], answer: "Para facilitar a leitura e evitar erros de lógica no aninhamento" },
+  { id: 129, code: "var nota = 6;\nif (nota >= 6) {\n  console.log('Aprovado');\n}", text: "Com nota = 6, qual será o comportamento do programa?", options: ["Imprime 'Aprovado' no console", "Não imprime nada", "Gera erro pois 6 não é maior que 6", "Imprime 'Reprovado'"], answer: "Imprime 'Aprovado' no console" },
+  { id: 130, text: "Qual das opções representa uma declaração válida de variável em JavaScript?", options: ["var idade = 16;", "var 1idade = 16;", "var idade aluno = 16;", "16 = var idade;"], answer: "var idade = 16;" }
+];
+
 // Variáveis Globais
 let selectedStudent = "";
+let currentExamMode = ""; // "P1", "REC" ou "P2"
 let selectedQuestions = [];
-let evaluationsData = [];
+let focusLossCount = 0;
+
+function normalizeName(name) {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+}
 
 // ==========================================
-// 4. INICIALIZAÇÃO
+// 4. MÓDULO DE SEGURANÇA E ANTI-COLA
+// ==========================================
+function applySecurityMeasures() {
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    alert("O clique com o botão direito está desativado durante a avaliação.");
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "PrintScreen" || e.keyCode === 44) {
+      e.preventDefault();
+      alert("Capturas de tela não são permitidas nesta avaliação.");
+      return false;
+    }
+
+    if (
+      (e.ctrlKey && (e.key === "c" || e.key === "C" || e.key === "u" || e.key === "U" || e.key === "p" || e.key === "P")) ||
+      e.key === "F12"
+    ) {
+      e.preventDefault();
+      alert("Este atalho foi desativado por questões de segurança da avaliação.");
+      return false;
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    const cardQuiz = document.getElementById("cardQuiz");
+    if (cardQuiz && cardQuiz.style.display !== "none") {
+      if (document.hidden) {
+        focusLossCount++;
+        cardQuiz.classList.add("blur-protection");
+      } else {
+        cardQuiz.classList.remove("blur-protection");
+        alert(`ATENÇÃO ${selectedStudent}!\nVocê saiu da aba da prova ${focusLossCount} vez(es).\nLembre-se de que a troca de abas é registrada.`);
+      }
+    }
+  });
+
+  document.addEventListener("copy", (e) => e.preventDefault());
+  document.addEventListener("cut", (e) => e.preventDefault());
+  document.addEventListener("paste", (e) => e.preventDefault());
+}
+
+// ==========================================
+// 5. INICIALIZAÇÃO
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   if (document.getElementById("studentSelect")) {
     initStudentPage();
+    applySecurityMeasures();
   }
 
   if (document.getElementById("adminTable")) {
@@ -87,8 +173,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ------------ LÓGICA DO ALUNO ------------
-function initStudentPage() {
+// ==========================================
+// 6. LÓGICA DO ESTUDANTE (PROVA 1, RECUPERAÇÃO E PROVA 2)
+// ==========================================
+async function initStudentPage() {
   const select = document.getElementById("studentSelect");
   
   studentList.forEach(student => {
@@ -97,6 +185,8 @@ function initStudentPage() {
     opt.textContent = student;
     select.appendChild(opt);
   });
+
+  select.addEventListener("change", renderStudentDashboard);
 
   document.getElementById("btnAdminAccess").addEventListener("click", () => {
     const pass = prompt("Digite a senha do Administrador:");
@@ -107,39 +197,159 @@ function initStudentPage() {
     }
   });
 
-  document.getElementById("btnStart").addEventListener("click", startQuiz);
   document.getElementById("quizForm").addEventListener("submit", submitQuiz);
+  
+  document.getElementById("btnBackHome").addEventListener("click", () => {
+    document.getElementById("cardSuccess").style.display = "none";
+    document.getElementById("cardLogin").style.display = "block";
+    renderStudentDashboard();
+  });
 }
 
-async function startQuiz() {
+async function renderStudentDashboard() {
   const select = document.getElementById("studentSelect");
+  const dashboard = document.getElementById("studentDashboard");
   selectedStudent = select.value;
 
   if (!selectedStudent) {
-    alert("Por favor, selecione seu nome!");
+    dashboard.style.display = "none";
     return;
   }
 
-  const studentKey = selectedStudent.replace(/[^a-zA-Z0-9]/g, "_");
+  dashboard.style.display = "block";
+  document.getElementById("dashboardTitle").textContent = `Situação de: ${selectedStudent}`;
+
+  const boxP1 = document.getElementById("boxProva1");
+  const boxRec = document.getElementById("boxRec");
+  const boxP2 = document.getElementById("boxProva2");
+
+  boxP1.innerHTML = "<p>Consultando banco de dados...</p>";
+  boxRec.innerHTML = "";
+  boxP2.innerHTML = "";
 
   try {
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, `evaluations/${studentKey}`));
+    const [snapP1, snapRec, snapP2] = await Promise.all([
+      get(child(dbRef, "evaluations")),
+      get(child(dbRef, "evaluations_rec")),
+      get(child(dbRef, "evaluations_p2"))
+    ]);
 
-    if (snapshot.exists()) {
-      alert("Atenção: Você já realizou esta avaliação anteriormente!");
-    } else {
-      selectedQuestions = [...questionBank].sort(() => 0.5 - Math.random()).slice(0, 15);
-      renderQuestions();
+    const norm = normalizeName(selectedStudent);
 
-      document.getElementById("cardLogin").style.display = "none";
-      document.getElementById("cardQuiz").style.display = "block";
-      document.getElementById("studentGreeting").textContent = `Aluno: ${selectedStudent}`;
+    let recP1 = null;
+    if (snapP1.exists()) {
+      recP1 = Object.values(snapP1.val()).find(item => normalizeName(item.studentName) === norm);
     }
+
+    let recRecuperacao = null;
+    if (snapRec.exists()) {
+      recRecuperacao = Object.values(snapRec.val()).find(item => normalizeName(item.studentName) === norm);
+    }
+
+    let recP2 = null;
+    if (snapP2.exists()) {
+      recP2 = Object.values(snapP2.val()).find(item => normalizeName(item.studentName) === norm);
+    }
+
+    // --- 1. BLOCO PROVA 1 (1ª CHAMADA / 2ª CHAMADA) ---
+    if (recP1) {
+      boxP1.innerHTML = `
+        <div class="exam-option-info">
+          <h4>1. Prova 1 (15 questões)</h4>
+          <p>✅ Concluída | Nota obtida: <strong>${recP1.score.toFixed(1)}</strong> / 3,0</p>
+        </div>
+        <span style="color: #27ae60; font-weight: 600;">Realizada</span>
+      `;
+    } else {
+      boxP1.innerHTML = `
+        <div class="exam-option-info">
+          <h4>1. Prova 1 - 2ª Chamada (15 questões)</h4>
+          <p>⚠️ Pendente (Você ainda não realizou a Prova 1).</p>
+        </div>
+        <button class="btn-action" id="btnStartP1">Realizar Prova 1</button>
+      `;
+      document.getElementById("btnStartP1").addEventListener("click", () => startQuiz("P1"));
+    }
+
+    // --- 2. BLOCO RECUPERAÇÃO DA PROVA 1 (25 QUESTÕES - VALE 5,0) ---
+    if (!recP1) {
+      boxRec.innerHTML = `
+        <div class="exam-option-info">
+          <h4>2. Recuperação da Prova 1 (25 questões)</h4>
+          <p>🔒 Disponível apenas para quem já realizou a Prova 1.</p>
+        </div>
+        <span style="color: #7f8c8d;">Bloqueada</span>
+      `;
+    } else if (recRecuperacao) {
+      boxRec.innerHTML = `
+        <div class="exam-option-info">
+          <h4>2. Recuperação da Prova 1 (25 questões)</h4>
+          <p>✅ Concluída | Nota obtida: <strong>${recRecuperacao.score.toFixed(1)}</strong> / 5,0</p>
+        </div>
+        <span style="color: #27ae60; font-weight: 600;">Realizada</span>
+      `;
+    } else {
+      boxRec.innerHTML = `
+        <div class="exam-option-info">
+          <h4>2. Recuperação da Prova 1 (25 questões)</h4>
+          <p>Sorteio de 25 questões do banco da Prova 1 (Vale até 5,0 pontos - 0,2 cada).</p>
+        </div>
+        <button class="btn-action" id="btnStartRec">Realizar Recuperação</button>
+      `;
+      document.getElementById("btnStartRec").addEventListener("click", () => startQuiz("REC"));
+    }
+
+    // --- 3. BLOCO PROVA 2 (15 NOVAS QUESTÕES - PARA TODOS) ---
+    if (recP2) {
+      boxP2.innerHTML = `
+        <div class="exam-option-info">
+          <h4>3. Prova 2 - Aulas 09, 10, 11 e JS (15 questões)</h4>
+          <p>✅ Concluída | Nota obtida: <strong>${recP2.score.toFixed(1)}</strong> / 3,0</p>
+        </div>
+        <span style="color: #27ae60; font-weight: 600;">Realizada</span>
+      `;
+    } else {
+      boxP2.innerHTML = `
+        <div class="exam-option-info">
+          <h4>3. Prova 2 - Aulas 09, 10, 11 e JS (15 questões)</h4>
+          <p>Nova avaliação objetiva (Vale até 3,0 pontos - 0,2 cada).</p>
+        </div>
+        <button class="btn-action" id="btnStartP2">Realizar Prova 2</button>
+      `;
+      document.getElementById("btnStartP2").addEventListener("click", () => startQuiz("P2"));
+    }
+
   } catch (err) {
     console.error(err);
-    alert("Erro ao conectar com o banco de dados.");
+    boxP1.innerHTML = "<p style='color:red;'>Erro ao conectar com o banco de dados.</p>";
   }
+}
+
+function startQuiz(mode) {
+  currentExamMode = mode;
+  focusLossCount = 0;
+
+  let titleText = "";
+
+  if (mode === "P1") {
+    selectedQuestions = [...questionBankP1].sort(() => 0.5 - Math.random()).slice(0, 15);
+    titleText = "Prova 1 (2ª Chamada) - 15 Questões (Vale 3,0)";
+  } else if (mode === "REC") {
+    selectedQuestions = [...questionBankP1].sort(() => 0.5 - Math.random()).slice(0, 25);
+    titleText = "Recuperação da Prova 1 - 25 Questões (Vale 5,0)";
+  } else if (mode === "P2") {
+    selectedQuestions = [...questionBankP2].sort(() => 0.5 - Math.random()).slice(0, 15);
+    titleText = "Prova 2 (JS Básico) - 15 Questões (Vale 3,0)";
+  }
+
+  renderQuestions();
+
+  document.getElementById("cardLogin").style.display = "none";
+  document.getElementById("cardQuiz").style.display = "block";
+  document.getElementById("studentGreeting").textContent = `Aluno: ${selectedStudent}`;
+  document.getElementById("examSubtitle").textContent = titleText;
+  window.scrollTo(0, 0);
 }
 
 function renderQuestions() {
@@ -175,6 +385,7 @@ async function submitQuiz(e) {
   e.preventDefault();
 
   let correctCount = 0;
+  const totalQ = selectedQuestions.length;
 
   selectedQuestions.forEach((q, index) => {
     const selectedOption = document.querySelector(`input[name="q_${index}"]:checked`);
@@ -183,6 +394,7 @@ async function submitQuiz(e) {
     }
   });
 
+  // Todas as provas valem 0,2 por questão (15q = 3,0 | 25q = 5,0)
   const finalScore = parseFloat((correctCount * 0.2).toFixed(1));
   const studentKey = selectedStudent.replace(/[^a-zA-Z0-9]/g, "_");
   const now = new Date();
@@ -191,22 +403,32 @@ async function submitQuiz(e) {
     studentName: selectedStudent,
     score: finalScore,
     correctAnswers: correctCount,
-    totalQuestions: 15,
+    totalQuestions: totalQ,
+    tabSwitches: focusLossCount,
     timestamp: now.toISOString(),
     formattedDate: now.toLocaleDateString("pt-BR") + " " + now.toLocaleTimeString("pt-BR")
   };
 
+  let targetPath = "evaluations";
+  if (currentExamMode === "REC") targetPath = "evaluations_rec";
+  if (currentExamMode === "P2") targetPath = "evaluations_p2";
+
   try {
-    await set(ref(database, `evaluations/${studentKey}`), record);
+    await set(ref(database, `${targetPath}/${studentKey}`), record);
     document.getElementById("cardQuiz").style.display = "none";
     document.getElementById("cardSuccess").style.display = "block";
+    window.scrollTo(0, 0);
   } catch (err) {
     console.error(err);
     alert("Erro ao salvar suas respostas no banco de dados.");
   }
 }
 
-// ------------ LÓGICA DO PAINEL ADMIN ------------
+// ==========================================
+// 7. LÓGICA DO PAINEL ADMIN (CONSOLIDADO 1DS)
+// ==========================================
+let consolidatedRows = [];
+
 function initAdminPage() {
   document.getElementById("btnExit").addEventListener("click", () => {
     window.location.href = "index.html";
@@ -225,85 +447,138 @@ function initAdminPage() {
 async function loadAdminData() {
   try {
     const dbRef = ref(database);
-    const snapshot = await get(child(dbRef, "evaluations"));
+    const [snapP1, snapRec, snapP2] = await Promise.all([
+      get(child(dbRef, "evaluations")),
+      get(child(dbRef, "evaluations_rec")),
+      get(child(dbRef, "evaluations_p2"))
+    ]);
+
+    const mapP1 = {};
+    if (snapP1.exists()) {
+      Object.values(snapP1.val()).forEach(item => {
+        mapP1[normalizeName(item.studentName)] = item;
+      });
+    }
+
+    const mapRec = {};
+    if (snapRec.exists()) {
+      Object.values(snapRec.val()).forEach(item => {
+        mapRec[normalizeName(item.studentName)] = item;
+      });
+    }
+
+    const mapP2 = {};
+    if (snapP2.exists()) {
+      Object.values(snapP2.val()).forEach(item => {
+        mapP2[normalizeName(item.studentName)] = item;
+      });
+    }
 
     const tbody = document.querySelector("#adminTable tbody");
     tbody.innerHTML = "";
+    consolidatedRows = [];
 
-    if (!snapshot.exists()) {
-      evaluationsData = [];
-      document.getElementById("mTotal").textContent = "0 / 39";
-      document.getElementById("mAverage").textContent = "0.0";
-      document.getElementById("mMax").textContent = "0.0";
-      document.getElementById("mMin").textContent = "0.0";
-      tbody.innerHTML = "<tr><td colspan='4'>Nenhuma avaliação realizada até o momento.</td></tr>";
-      return;
-    }
+    let countP1 = 0, countRec = 0, countP2 = 0;
+    let scoresP2 = [];
 
-    evaluationsData = Object.values(snapshot.val());
+    studentList.forEach(student => {
+      const norm = normalizeName(student);
+      const r1 = mapP1[norm];
+      const rRec = mapRec[norm];
+      const r2 = mapP2[norm];
 
-    const total = evaluationsData.length;
-    const scores = evaluationsData.map(e => e.score);
-    const avg = (scores.reduce((a, b) => a + b, 0) / total).toFixed(1);
-    const max = Math.max(...scores).toFixed(1);
-    const min = Math.min(...scores).toFixed(1);
+      if (r1) countP1++;
+      if (rRec) countRec++;
+      if (r2) {
+        countP2++;
+        scoresP2.push(r2.score);
+      }
 
-    document.getElementById("mTotal").textContent = `${total} / 39`;
-    document.getElementById("mAverage").textContent = avg;
-    document.getElementById("mMax").textContent = max;
-    document.getElementById("mMin").textContent = min;
+      const s1 = r1 ? r1.score : null;
+      const sRec = rRec ? rRec.score : null;
+      const s2 = r2 ? r2.score : null;
 
-    evaluationsData.forEach(item => {
+      let finalP1 = null;
+      if (s1 !== null && sRec !== null) finalP1 = Math.max(s1, sRec);
+      else if (s1 !== null) finalP1 = s1;
+      else if (sRec !== null) finalP1 = sRec;
+
+      const row = {
+        studentName: student,
+        p1: s1 !== null ? s1.toFixed(1) : "-",
+        rec: sRec !== null ? sRec.toFixed(1) : "-",
+        finalP1: finalP1 !== null ? finalP1.toFixed(1) : "-",
+        p2: s2 !== null ? s2.toFixed(1) : "-",
+        tabsRec: rRec ? (rRec.tabSwitches || 0) : 0,
+        tabsP2: r2 ? (r2.tabSwitches || 0) : 0
+      };
+
+      consolidatedRows.push(row);
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><strong>${item.studentName}</strong></td>
-        <td>${item.score.toFixed(1)}</td>
-        <td>${item.correctAnswers} / 15</td>
-        <td>${item.formattedDate}</td>
+        <td><strong>${row.studentName}</strong></td>
+        <td>${row.p1}</td>
+        <td>${row.rec} ${row.tabsRec > 0 ? `<small style="color:#c0392b;">(${row.tabsRec}x aba)</small>` : ""}</td>
+        <td><strong>${row.finalP1}</strong></td>
+        <td>${row.p2} ${row.tabsP2 > 0 ? `<small style="color:#c0392b;">(${row.tabsP2}x aba)</small>` : ""}</td>
       `;
       tbody.appendChild(tr);
     });
+
+    document.getElementById("mTotalP1").textContent = `${countP1} / 39`;
+    document.getElementById("mTotalRec").textContent = `${countRec} / 39`;
+    document.getElementById("mTotalP2").textContent = `${countP2} / 39`;
+
+    if (scoresP2.length > 0) {
+      const avgP2 = (scoresP2.reduce((a, b) => a + b, 0) / scoresP2.length).toFixed(1);
+      document.getElementById("mAverageP2").textContent = avgP2;
+    } else {
+      document.getElementById("mAverageP2").textContent = "0.0";
+    }
+
   } catch (err) {
     console.error(err);
   }
 }
 
 function exportToCSV() {
-  if (evaluationsData.length === 0) {
-    alert("Não há dados para exportar.");
-    return;
-  }
+  if (consolidatedRows.length === 0) return;
 
   let csvContent = "\uFEFF";
-  csvContent += "Estudante;Nota;Acertos;Data e Horario\n";
+  csvContent += "Estudante;Prova 1;Recuperacao P1 (max 5.0);Nota Final P1;Prova 2 (max 3.0)\n";
 
-  evaluationsData.forEach(item => {
-    csvContent += `"${item.studentName}";"${item.score.toFixed(1)}";"${item.correctAnswers}/15";"${item.formattedDate}"\n`;
+  consolidatedRows.forEach(r => {
+    csvContent += `"${r.studentName}";"${r.p1}";"${r.rec}";"${r.finalP1}";"${r.p2}"\n`;
   });
 
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
-  link.setAttribute("download", `relatorio_prova_1DS_CESF.csv`);
+  link.setAttribute("download", "relatorio_consolidado_1DS_CESF.csv");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
 async function resetDatabase() {
-  const confirmPass = prompt("ATENÇÃO: Isso apagará TODOS os registros da turma!\nDigite a senha do admin para confirmar:");
+  const choice = prompt("Qual etapa deseja resetar?\nDigite 1 para Recuperação (evaluations_rec)\nDigite 2 para Prova 2 (evaluations_p2)\n(As notas da 1ª chamada original não serão apagadas)");
   
+  if (choice !== "1" && choice !== "2") return;
+
+  const confirmPass = prompt("Digite a senha do admin para confirmar a exclusão:");
   if (confirmPass === "masaju1820") {
+    const node = choice === "1" ? "evaluations_rec" : "evaluations_p2";
     try {
-      await remove(ref(database, "evaluations"));
-      alert("Todos os dados foram removidos com sucesso!");
+      await remove(ref(database, node));
+      alert("Registros apagados com sucesso!");
       loadAdminData();
     } catch (err) {
       console.error(err);
-      alert("Erro ao tentar resetar o banco de dados.");
+      alert("Erro ao resetar dados.");
     }
   } else if (confirmPass !== null) {
-    alert("Senha incorreta! Operação cancelada.");
+    alert("Senha incorreta!");
   }
 }
