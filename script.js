@@ -471,40 +471,51 @@ async function handleCSVUpload(event) {
 
   const reader = new FileReader();
   reader.onload = async function (e) {
-    const text = e.target.result;
-    const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+    try {
+      const text = e.target.result;
+      const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
 
-    let importedCount = 0;
+      if (lines.length < 2) {
+        alert("O arquivo CSV selecionado está vazio ou inválido.");
+        return;
+      }
 
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(";").map(c => c.replace(/^"|"$/g, "").trim());
-      if (cols.length < 2) continue;
+      const separator = lines[0].includes(";") ? ";" : ",";
+      let importedCount = 0;
 
-      const studentName = cols[0];
-      const score = parseFloat(cols[1].replace(",", "."));
-      const acertosStr = cols[2] || "0/15";
-      const correctAnswers = parseInt(acertosStr.split("/")[0]) || 0;
-      const formattedDate = cols[3] || "Restaurado via CSV";
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(separator).map(c => c.replace(/^"|"$/g, "").trim());
+        if (cols.length < 2) continue;
 
-      if (!studentName || isNaN(score)) continue;
+        const studentName = cols[0];
+        const score = parseFloat(cols[1].replace(",", "."));
+        const acertosStr = cols[2] || "0/15";
+        const correctAnswers = parseInt(acertosStr.split("/")[0]) || 0;
+        const formattedDate = cols[3] || "Restaurado via CSV";
 
-      const studentKey = studentName.replace(/[^a-zA-Z0-9]/g, "_");
-      const record = {
-        studentName: studentName,
-        score: score,
-        correctAnswers: correctAnswers,
-        totalQuestions: 15,
-        timestamp: new Date().toISOString(),
-        formattedDate: formattedDate
-      };
+        if (!studentName || isNaN(score)) continue;
 
-      await set(ref(database, `evaluations/${studentKey}`), record);
-      importedCount++;
+        const studentKey = studentName.replace(/[^a-zA-Z0-9]/g, "_");
+        const record = {
+          studentName: studentName,
+          score: score,
+          correctAnswers: correctAnswers,
+          totalQuestions: 15,
+          timestamp: new Date().toISOString(),
+          formattedDate: formattedDate
+        };
+
+        await set(ref(database, `evaluations/${studentKey}`), record);
+        importedCount++;
+      }
+
+      alert(`Sucesso! ${importedCount} notas da Prova 1 foram restauradas para o banco de dados.`);
+      event.target.value = "";
+      loadAdminData();
+    } catch (err) {
+      console.error("Erro ao importar CSV:", err);
+      alert(`Erro ao gravar no Firebase: ${err.message}\n\nVerifique se as Regras (Rules) do Realtime Database estão publicadas como true.`);
     }
-
-    alert(`Sucesso! ${importedCount} notas da Prova 1 foram restauradas para o banco de dados.`);
-    event.target.value = "";
-    loadAdminData();
   };
 
   reader.readAsText(file, "UTF-8");
