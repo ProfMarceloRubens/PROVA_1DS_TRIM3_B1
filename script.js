@@ -120,8 +120,8 @@ function normalizeKey(str) {
   return str
     .toString()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9]/g, "")
+    .replace(/[\u0300-\u036f]/g, "") // Remove acentos (Í -> I)
+    .replace(/[^a-zA-Z]/g, "")       // Remove números da chamada, parênteses, espaços e underscores
     .toUpperCase()
     .trim();
 }
