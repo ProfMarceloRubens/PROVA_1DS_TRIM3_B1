@@ -110,6 +110,7 @@ let selectedStudent = "";
 let currentExamMode = ""; // "P1", "REC" ou "P2"
 let selectedQuestions = [];
 let focusLossCount = 0;
+let consolidatedRows = [];
 
 // ==========================================
 // FUNÇÕES BLINDADAS DE NORMALIZAÇÃO E BUSCA
@@ -263,7 +264,6 @@ async function renderStudentDashboard() {
       get(child(dbRef, "evaluations_p2"))
     ]);
 
-    // Busca blindada (verifica tanto chave quanto studentName)
     const recP1 = findStudentRecord(snapP1, selectedStudent);
     const recRecuperacao = findStudentRecord(snapRec, selectedStudent);
     const recP2 = findStudentRecord(snapP2, selectedStudent);
@@ -441,10 +441,8 @@ async function submitQuiz(e) {
 }
 
 // ==========================================
-// 7. LÓGICA DO PAINEL ADMIN (CONSOLIDADO 1DS)
+// 7. LÓGICA DO PAINEL ADMIN (CONSOLIDADO 1DS + IMPORTAÇÃO CSV)
 // ==========================================
-let consolidatedRows = [];
-
 function initAdminPage() {
   document.getElementById("btnExit").addEventListener("click", () => {
     window.location.href = "index.html";
@@ -457,7 +455,59 @@ function initAdminPage() {
     btnReset.addEventListener("click", resetDatabase);
   }
 
+  const btnImport = document.getElementById("btnImportCSV");
+  const fileInput = document.getElementById("csvFileInput");
+  if (btnImport && fileInput) {
+    btnImport.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", handleCSVUpload);
+  }
+
   loadAdminData();
+}
+
+async function handleCSVUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+
+    let importedCount = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(";").map(c => c.replace(/^"|"$/g, "").trim());
+      if (cols.length < 2) continue;
+
+      const studentName = cols[0];
+      const score = parseFloat(cols[1].replace(",", "."));
+      const acertosStr = cols[2] || "0/15";
+      const correctAnswers = parseInt(acertosStr.split("/")[0]) || 0;
+      const formattedDate = cols[3] || "Restaurado via CSV";
+
+      if (!studentName || isNaN(score)) continue;
+
+      const studentKey = studentName.replace(/[^a-zA-Z0-9]/g, "_");
+      const record = {
+        studentName: studentName,
+        score: score,
+        correctAnswers: correctAnswers,
+        totalQuestions: 15,
+        timestamp: new Date().toISOString(),
+        formattedDate: formattedDate
+      };
+
+      await set(ref(database, `evaluations/${studentKey}`), record);
+      importedCount++;
+    }
+
+    alert(`Sucesso! ${importedCount} notas da Prova 1 foram restauradas para o banco de dados.`);
+    event.target.value = "";
+    loadAdminData();
+  };
+
+  reader.readAsText(file, "UTF-8");
 }
 
 async function loadAdminData() {

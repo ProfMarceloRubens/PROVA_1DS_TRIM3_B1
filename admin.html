@@ -45,6 +45,8 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
         <h2>Consolidado da Turma (1º DS)</h2>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+          <button class="btn-primary" id="btnImportCSV" style="width: auto; background-color: #2980b9;">Restaurar Prova 1 (CSV)</button>
           <button class="btn-primary" id="btnExportCSV" style="width: auto;">Baixar Relatório Completo (CSV)</button>
           <button class="btn-primary" id="btnResetData" style="width: auto; background-color: #c0392b;">Resetar Etapa</button>
         </div>
@@ -55,10 +57,10 @@
           <thead>
             <tr>
               <th>Estudante</th>
-              <th>Prova 1</th>
-              <th>Recuperação (P1)</th>
+              <th>Prova 1 (máx 3,0)</th>
+              <th>Recuperação (máx 5,0)</th>
               <th>Nota Final P1</th>
-              <th>Prova 2</th>
+              <th>Prova 2 (máx 3,0)</th>
             </tr>
           </thead>
           <tbody>
