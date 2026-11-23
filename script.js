@@ -111,8 +111,36 @@ let currentExamMode = ""; // "P1", "REC" ou "P2"
 let selectedQuestions = [];
 let focusLossCount = 0;
 
-function normalizeName(name) {
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+// ==========================================
+// FUNÇÕES BLINDADAS DE NORMALIZAÇÃO E BUSCA
+// ==========================================
+function normalizeKey(str) {
+  if (!str) return "";
+  return str
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase()
+    .trim();
+}
+
+function findStudentRecord(snapshot, targetStudentName) {
+  if (!snapshot || !snapshot.exists()) return null;
+
+  const targetNorm = normalizeKey(targetStudentName);
+  const dataObj = snapshot.val();
+
+  for (const [key, value] of Object.entries(dataObj)) {
+    if (!value) continue;
+    const keyNorm = normalizeKey(key);
+    const nameNorm = normalizeKey(value.studentName);
+
+    if (keyNorm === targetNorm || nameNorm === targetNorm) {
+      return value;
+    }
+  }
+  return null;
 }
 
 // ==========================================
@@ -176,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 6. LÓGICA DO ESTUDANTE (PROVA 1, RECUPERAÇÃO E PROVA 2)
 // ==========================================
-async function initStudentPage() {
+function initStudentPage() {
   const select = document.getElementById("studentSelect");
   
   studentList.forEach(student => {
@@ -235,29 +263,17 @@ async function renderStudentDashboard() {
       get(child(dbRef, "evaluations_p2"))
     ]);
 
-    const norm = normalizeName(selectedStudent);
+    // Busca blindada (verifica tanto chave quanto studentName)
+    const recP1 = findStudentRecord(snapP1, selectedStudent);
+    const recRecuperacao = findStudentRecord(snapRec, selectedStudent);
+    const recP2 = findStudentRecord(snapP2, selectedStudent);
 
-    let recP1 = null;
-    if (snapP1.exists()) {
-      recP1 = Object.values(snapP1.val()).find(item => normalizeName(item.studentName) === norm);
-    }
-
-    let recRecuperacao = null;
-    if (snapRec.exists()) {
-      recRecuperacao = Object.values(snapRec.val()).find(item => normalizeName(item.studentName) === norm);
-    }
-
-    let recP2 = null;
-    if (snapP2.exists()) {
-      recP2 = Object.values(snapP2.val()).find(item => normalizeName(item.studentName) === norm);
-    }
-
-    // --- 1. BLOCO PROVA 1 (1ª CHAMADA / 2ª CHAMADA) ---
-    if (recP1) {
+    // --- 1. BLOCO PROVA 1 ---
+    if (recP1 && recP1.score !== undefined) {
       boxP1.innerHTML = `
         <div class="exam-option-info">
           <h4>1. Prova 1 (15 questões)</h4>
-          <p>✅ Concluída | Nota obtida: <strong>${recP1.score.toFixed(1)}</strong> / 3,0</p>
+          <p>✅ Concluída | Nota obtida: <strong>${Number(recP1.score).toFixed(1)}</strong> / 3,0</p>
         </div>
         <span style="color: #27ae60; font-weight: 600;">Realizada</span>
       `;
@@ -281,11 +297,11 @@ async function renderStudentDashboard() {
         </div>
         <span style="color: #7f8c8d;">Bloqueada</span>
       `;
-    } else if (recRecuperacao) {
+    } else if (recRecuperacao && recRecuperacao.score !== undefined) {
       boxRec.innerHTML = `
         <div class="exam-option-info">
           <h4>2. Recuperação da Prova 1 (25 questões)</h4>
-          <p>✅ Concluída | Nota obtida: <strong>${recRecuperacao.score.toFixed(1)}</strong> / 5,0</p>
+          <p>✅ Concluída | Nota obtida: <strong>${Number(recRecuperacao.score).toFixed(1)}</strong> / 5,0</p>
         </div>
         <span style="color: #27ae60; font-weight: 600;">Realizada</span>
       `;
@@ -301,11 +317,11 @@ async function renderStudentDashboard() {
     }
 
     // --- 3. BLOCO PROVA 2 (15 NOVAS QUESTÕES - PARA TODOS) ---
-    if (recP2) {
+    if (recP2 && recP2.score !== undefined) {
       boxP2.innerHTML = `
         <div class="exam-option-info">
           <h4>3. Prova 2 - Aulas 09, 10, 11 e JS (15 questões)</h4>
-          <p>✅ Concluída | Nota obtida: <strong>${recP2.score.toFixed(1)}</strong> / 3,0</p>
+          <p>✅ Concluída | Nota obtida: <strong>${Number(recP2.score).toFixed(1)}</strong> / 3,0</p>
         </div>
         <span style="color: #27ae60; font-weight: 600;">Realizada</span>
       `;
@@ -321,8 +337,8 @@ async function renderStudentDashboard() {
     }
 
   } catch (err) {
-    console.error(err);
-    boxP1.innerHTML = "<p style='color:red;'>Erro ao conectar com o banco de dados.</p>";
+    console.error("Erro detalhado do Firebase:", err);
+    boxP1.innerHTML = `<p style='color:red;'>Erro ao conectar com o banco de dados (${err.message}).</p>`;
   }
 }
 
@@ -453,27 +469,6 @@ async function loadAdminData() {
       get(child(dbRef, "evaluations_p2"))
     ]);
 
-    const mapP1 = {};
-    if (snapP1.exists()) {
-      Object.values(snapP1.val()).forEach(item => {
-        mapP1[normalizeName(item.studentName)] = item;
-      });
-    }
-
-    const mapRec = {};
-    if (snapRec.exists()) {
-      Object.values(snapRec.val()).forEach(item => {
-        mapRec[normalizeName(item.studentName)] = item;
-      });
-    }
-
-    const mapP2 = {};
-    if (snapP2.exists()) {
-      Object.values(snapP2.val()).forEach(item => {
-        mapP2[normalizeName(item.studentName)] = item;
-      });
-    }
-
     const tbody = document.querySelector("#adminTable tbody");
     tbody.innerHTML = "";
     consolidatedRows = [];
@@ -482,21 +477,20 @@ async function loadAdminData() {
     let scoresP2 = [];
 
     studentList.forEach(student => {
-      const norm = normalizeName(student);
-      const r1 = mapP1[norm];
-      const rRec = mapRec[norm];
-      const r2 = mapP2[norm];
+      const r1 = findStudentRecord(snapP1, student);
+      const rRec = findStudentRecord(snapRec, student);
+      const r2 = findStudentRecord(snapP2, student);
 
       if (r1) countP1++;
       if (rRec) countRec++;
       if (r2) {
         countP2++;
-        scoresP2.push(r2.score);
+        scoresP2.push(Number(r2.score));
       }
 
-      const s1 = r1 ? r1.score : null;
-      const sRec = rRec ? rRec.score : null;
-      const s2 = r2 ? r2.score : null;
+      const s1 = r1 && r1.score !== undefined ? Number(r1.score) : null;
+      const sRec = rRec && rRec.score !== undefined ? Number(rRec.score) : null;
+      const s2 = r2 && r2.score !== undefined ? Number(r2.score) : null;
 
       let finalP1 = null;
       if (s1 !== null && sRec !== null) finalP1 = Math.max(s1, sRec);
@@ -538,7 +532,7 @@ async function loadAdminData() {
     }
 
   } catch (err) {
-    console.error(err);
+    console.error("Erro no painel admin:", err);
   }
 }
 
