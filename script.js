@@ -1,36 +1,74 @@
 // ==========================================
-// 1. CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (v13 Modular)
+// 1. CONFIGURAÇÃO DO BANCO DE DADOS (FIREBASE REST API)
 // ==========================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-import { getDatabase, ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
+const DB_URL = "https://prova-1ds-trim3-b1-default-rtdb.firebaseio.com";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyA9y0tW7OH3hXPJD1RZsIntBb76KOYZxvA",
-  authDomain: "prova-1ds-trim3-b1.firebaseapp.com",
-  databaseURL: "https://prova-1ds-trim3-b1-default-rtdb.firebaseio.com",
-  projectId: "prova-1ds-trim3-b1",
-  storageBucket: "prova-1ds-trim3-b1.firebasestorage.app",
-  messagingSenderId: "266741572349",
-  appId: "1:266741572349:web:c4bcd4e8388585e21fd494"
-};
+async function dbGet(path) {
+  const res = await fetch(`${DB_URL}/${path}.json?t=${Date.now()}`);
+  if (!res.ok) throw new Error(`Erro HTTP ${res.status} ao ler ${path}`);
+  return await res.json();
+}
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+async function dbPut(path, data) {
+  const res = await fetch(`${DB_URL}/${path}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(`Erro HTTP ${res.status} ao salvar em ${path}`);
+  return await res.json();
+}
+
+async function dbDelete(path) {
+  const res = await fetch(`${DB_URL}/${path}.json`, {
+    method: "DELETE"
+  });
+  if (!res.ok) throw new Error(`Erro HTTP ${res.status} ao apagar ${path}`);
+}
 
 // ==========================================
-// 2. LISTA OFICIAL DE ESTUDANTES (1DS CESF - 39 ALUNOS)
+// 2. LISTA OFICIAL DE ESTUDANTES (1DS CESF - PADRÃO CHAMADA)
 // ==========================================
 const studentList = [
-  "ALLAN VINICIUS", "ANDREY EDIVAN", "BERNARDO AGE", "BERNARDO LEITE",
-  "CAIO MONTAGNA", "CHRISTIAN GABRIEL", "DANIEL MOREIRA", "DANIEL WILCEK",
-  "EDUARDO ANTONIO", "EDUARDO CREMER", "ELIAS SOUZA", "ELOÁ PEREIRA",
-  "ERICK HOE", "FERNANDO VALENTIM", "GABRIEL DA SILVA", "GABRIEL SOEK",
-  "GUSTAVO GONÇALVES", "GUSTAVO MASSOQUETO", "GUSTAVO SALDANHA", "IAN GUSTAVO",
-  "JHONATHAN DA SILVA", "JOÃO FRANCISCO", "JOÃO PEDRO", "JOSÉ ROBERTO",
-  "KAUE ALEXANDRE", "LEONARDO FRANQUITO", "LUÍS HENRIQUE", "MIGUEL PIETRO",
-  "OSVALDO ZANLORENZI", "PEDRO ZAGESKI", "RILLARY VITÓRIA", "RODRIGO ARAÚJO",
-  "ROGER DE PAULA", "THALES JOSÉ", "VICTOR HUGO", "WESLEY HENRIQUE",
-  "OTÁVIO DA SILVA", "VINÍCIUS APARECIDO", "DERIK LUCCA"
+  "2) ALLAN VINICIUS",
+  "3) ANDREY EDIVAN",
+  "4) BERNARDO AGE",
+  "5) BERNARDO LEITE",
+  "6) CAIO MONTAGNA",
+  "7) CHRISTIAN GABRIEL",
+  "8) DANIEL MOREIRA",
+  "9) DANIEL WILCEK",
+  "10) EDUARDO ANTONIO",
+  "11) EDUARDO CREMER",
+  "12) ELIAS SOUZA",
+  "13) ELOÁ PEREIRA",
+  "14) ERICK HOE",
+  "15) FERNANDO VALENTIM",
+  "16) GABRIEL DA SILVA",
+  "17) GABRIEL SOEK",
+  "18) GUSTAVO GONÇALVES",
+  "19) GUSTAVO MASSOQUETO",
+  "20) GUSTAVO SALDANHA",
+  "21) IAN GUSTAVO",
+  "22) JHONATHAN DA SILVA",
+  "23) JOÃO FRANCISCO",
+  "24) JOÃO PEDRO",
+  "25) JOSÉ ROBERTO",
+  "26) KAUE ALEXANDRE",
+  "27) LEONARDO FRANQUITO",
+  "30) LUÍS HENRIQUE",
+  "33) MIGUEL PIETRO",
+  "34) OSVALDO ZANLORENZI",
+  "35) PEDRO ZAGESKI",
+  "36) RILLARY VITÓRIA",
+  "37) RODRIGO ARAÚJO",
+  "38) ROGER DE PAULA",
+  "39) THALES JOSÉ",
+  "40) VICTOR HUGO",
+  "41) WESLEY HENRIQUE",
+  "42) OTÁVIO DA SILVA",
+  "43) VINÍCIUS APARECIDO",
+  "44) DERIK LUCCA"
 ];
 
 // ==========================================
@@ -113,33 +151,36 @@ let focusLossCount = 0;
 let consolidatedRows = [];
 
 // ==========================================
-// FUNÇÕES BLINDADAS DE NORMALIZAÇÃO E BUSCA
+// FUNÇÕES DE NORMALIZAÇÃO E BUSCA
 // ==========================================
-function normalizeKey(str) {
+function makeFirebaseKey(studentName) {
+  return studentName.replace(/[^a-zA-Z0-9]/g, "_");
+}
+
+function normalizeLetters(str) {
   if (!str) return "";
   return str
     .toString()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove acentos (Í -> I)
-    .replace(/[^a-zA-Z]/g, "")       // Remove números da chamada, parênteses, espaços e underscores
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z]/g, "")
     .toUpperCase()
     .trim();
 }
 
-function findStudentRecord(snapshot, targetStudentName) {
-  if (!snapshot || !snapshot.exists()) return null;
+function findStudentRecord(dataObj, targetStudentName) {
+  if (!dataObj) return null;
 
-  const targetNorm = normalizeKey(targetStudentName);
-  const dataObj = snapshot.val();
+  const exactKey = makeFirebaseKey(targetStudentName);
+  if (dataObj[exactKey]) return dataObj[exactKey];
+
+  const targetLetters = normalizeLetters(targetStudentName);
 
   for (const [key, value] of Object.entries(dataObj)) {
     if (!value) continue;
-    const keyNorm = normalizeKey(key);
-    const nameNorm = normalizeKey(value.studentName);
-
-    if (keyNorm === targetNorm || nameNorm === targetNorm) {
-      return value;
-    }
+    if (value.studentName === targetStudentName) return value;
+    if (normalizeLetters(value.studentName) === targetLetters) return value;
+    if (normalizeLetters(key) === targetLetters) return value;
   }
   return null;
 }
@@ -257,16 +298,15 @@ async function renderStudentDashboard() {
   boxP2.innerHTML = "";
 
   try {
-    const dbRef = ref(database);
-    const [snapP1, snapRec, snapP2] = await Promise.all([
-      get(child(dbRef, "evaluations")),
-      get(child(dbRef, "evaluations_rec")),
-      get(child(dbRef, "evaluations_p2"))
+    const [dataP1, dataRec, dataP2] = await Promise.all([
+      dbGet("evaluations"),
+      dbGet("evaluations_rec"),
+      dbGet("evaluations_p2")
     ]);
 
-    const recP1 = findStudentRecord(snapP1, selectedStudent);
-    const recRecuperacao = findStudentRecord(snapRec, selectedStudent);
-    const recP2 = findStudentRecord(snapP2, selectedStudent);
+    const recP1 = findStudentRecord(dataP1, selectedStudent);
+    const recRecuperacao = findStudentRecord(dataRec, selectedStudent);
+    const recP2 = findStudentRecord(dataP2, selectedStudent);
 
     // --- 1. BLOCO PROVA 1 ---
     if (recP1 && recP1.score !== undefined) {
@@ -337,7 +377,7 @@ async function renderStudentDashboard() {
     }
 
   } catch (err) {
-    console.error("Erro detalhado do Firebase:", err);
+    console.error("Erro ao ler Firebase:", err);
     boxP1.innerHTML = `<p style='color:red;'>Erro ao conectar com o banco de dados (${err.message}).</p>`;
   }
 }
@@ -412,7 +452,7 @@ async function submitQuiz(e) {
 
   // Todas as provas valem 0,2 por questão (15q = 3,0 | 25q = 5,0)
   const finalScore = parseFloat((correctCount * 0.2).toFixed(1));
-  const studentKey = selectedStudent.replace(/[^a-zA-Z0-9]/g, "_");
+  const studentKey = makeFirebaseKey(selectedStudent);
   const now = new Date();
 
   const record = {
@@ -430,13 +470,13 @@ async function submitQuiz(e) {
   if (currentExamMode === "P2") targetPath = "evaluations_p2";
 
   try {
-    await set(ref(database, `${targetPath}/${studentKey}`), record);
+    await dbPut(`${targetPath}/${studentKey}`, record);
     document.getElementById("cardQuiz").style.display = "none";
     document.getElementById("cardSuccess").style.display = "block";
     window.scrollTo(0, 0);
   } catch (err) {
     console.error(err);
-    alert("Erro ao salvar suas respostas no banco de dados.");
+    alert("Erro ao salvar suas respostas no banco de dados: " + err.message);
   }
 }
 
@@ -495,7 +535,7 @@ async function handleCSVUpload(event) {
 
         if (!studentName || isNaN(score)) continue;
 
-        const studentKey = studentName.replace(/[^a-zA-Z0-9]/g, "_");
+        const studentKey = makeFirebaseKey(studentName);
         const record = {
           studentName: studentName,
           score: score,
@@ -505,7 +545,7 @@ async function handleCSVUpload(event) {
           formattedDate: formattedDate
         };
 
-        await set(ref(database, `evaluations/${studentKey}`), record);
+        await dbPut(`evaluations/${studentKey}`, record);
         importedCount++;
       }
 
@@ -514,7 +554,7 @@ async function handleCSVUpload(event) {
       loadAdminData();
     } catch (err) {
       console.error("Erro ao importar CSV:", err);
-      alert(`Erro ao gravar no Firebase: ${err.message}\n\nVerifique se as Regras (Rules) do Realtime Database estão publicadas como true.`);
+      alert(`Erro ao gravar no Firebase: ${err.message}`);
     }
   };
 
@@ -523,11 +563,10 @@ async function handleCSVUpload(event) {
 
 async function loadAdminData() {
   try {
-    const dbRef = ref(database);
-    const [snapP1, snapRec, snapP2] = await Promise.all([
-      get(child(dbRef, "evaluations")),
-      get(child(dbRef, "evaluations_rec")),
-      get(child(dbRef, "evaluations_p2"))
+    const [dataP1, dataRec, dataP2] = await Promise.all([
+      dbGet("evaluations"),
+      dbGet("evaluations_rec"),
+      dbGet("evaluations_p2")
     ]);
 
     const tbody = document.querySelector("#adminTable tbody");
@@ -538,9 +577,9 @@ async function loadAdminData() {
     let scoresP2 = [];
 
     studentList.forEach(student => {
-      const r1 = findStudentRecord(snapP1, student);
-      const rRec = findStudentRecord(snapRec, student);
-      const r2 = findStudentRecord(snapP2, student);
+      const r1 = findStudentRecord(dataP1, student);
+      const rRec = findStudentRecord(dataRec, student);
+      const r2 = findStudentRecord(dataP2, student);
 
       if (r1) countP1++;
       if (rRec) countRec++;
@@ -626,12 +665,12 @@ async function resetDatabase() {
   if (confirmPass === "masaju1820") {
     const node = choice === "1" ? "evaluations_rec" : "evaluations_p2";
     try {
-      await remove(ref(database, node));
+      await dbDelete(node);
       alert("Registros apagados com sucesso!");
       loadAdminData();
     } catch (err) {
       console.error(err);
-      alert("Erro ao resetar dados.");
+      alert("Erro ao resetar dados: " + err.message);
     }
   } else if (confirmPass !== null) {
     alert("Senha incorreta!");
